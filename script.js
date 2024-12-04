@@ -1,61 +1,47 @@
 document.getElementById('catalogForm').addEventListener('submit', function(event) {
     event.preventDefault();
-    const inputFile = document.getElementById('inputFile').files[0];
-    if (inputFile) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const inputText = e.target.result;
-            processInputData(inputText);
-        };
-        reader.readAsText(inputFile);
+    const inputText = document.getElementById('inputText').value;
+    if (inputText) {
+        processInputData(inputText);
+        document.getElementById('inputText').value = '';
     }
 });
 
 document.getElementById('filter').addEventListener('change', function() {
-    const inputFile = document.getElementById('inputFile').files[0];
-    if (inputFile) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const inputText = e.target.result;
-            processInputData(inputText);
-        };
-        reader.readAsText(inputFile);
+    const inputText = document.getElementById('inputText').value;
+    if (inputText) {
+        processInputData(inputText);
     }
 });
 
 document.getElementById('percentageFilter').addEventListener('change', function() {
-    const inputFile = document.getElementById('inputFile').files[0];
-    if (inputFile) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const inputText = e.target.result;
-            processInputData(inputText);
-        };
-        reader.readAsText(inputFile);
+    const inputText = document.getElementById('inputText').value;
+    if (inputText) {
+        processInputData(inputText);
     }
 });
 
 function processInputData(inputText) {
     const catalog = document.getElementById('catalog');
-    catalog.innerHTML = ''; 
+    catalog.innerHTML = ''; // Limpa o conteúdo anterior
 
     const filterDays = parseInt(document.getElementById('filter').value);
     const percentageFilter = parseInt(document.getElementById('percentageFilter').value);
-    const lines = inputText.split('\n'); 
+    const lines = inputText.split('\n'); // Divide o texto por linhas
     const timeData = {};
 
-    
+    // Converte as datas e organiza os dados por data
     const dataEntries = lines.map(line => {
-        const items = line.split(','); 
+        const items = line.split(/\s+/); // Divide a linha por espaços
         const dateParts = items[0].split('.');
         const date = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
-        const time = items[1]; 
+        const time = items[1]; // Hora
         const value1 = parseFloat(items[2]);
         const value4 = parseFloat(items[5]);
         return { date, time, value1, value4 };
-    }).sort((a, b) => b.date - a.date); /
+    }).sort((a, b) => b.date - a.date); // Ordena por data decrescente
 
-    
+    // Filtra os dados com base no filtro selecionado
     const filteredData = [];
     const uniqueDates = new Set();
     for (const entry of dataEntries) {
@@ -67,7 +53,7 @@ function processInputData(inputText) {
         }
     }
 
-    
+    // Processa os dados filtrados
     filteredData.forEach(entry => {
         const { time, value1, value4 } = entry;
         if (!timeData[time]) {
@@ -80,7 +66,7 @@ function processInputData(inputText) {
         }
     });
 
-    
+    // Cria a tabela de resultados
     const resultTable = document.createElement('table');
     const headerRow = document.createElement('tr');
     const headers = ['Hora', 'Hora Ajustada', 'Condição', 'Velas Verdes', 'Velas Vermelhas', 'Resultado', 'Porcentagem'];
@@ -91,7 +77,7 @@ function processInputData(inputText) {
     });
     resultTable.appendChild(headerRow);
 
-    
+    // Adiciona os dados à tabela de resultados
     const sortedTimes = Object.keys(timeData).sort();
     sortedTimes.forEach(time => {
         const dataRow = document.createElement('tr');
@@ -99,7 +85,7 @@ function processInputData(inputText) {
         timeCell.textContent = time;
         dataRow.appendChild(timeCell);
 
-       
+        // Calcula a hora ajustada
         const [hours, minutes] = time.split(':').map(Number);
         let adjustedHours = hours - 5;
         if (adjustedHours < 0) {
@@ -139,7 +125,7 @@ function processInputData(inputText) {
             percentage = ((timeData[time].red / total) * 100).toFixed(2);
         }
 
-        
+        // Aplica o filtro de porcentagem
         if (percentageFilter === 0 || percentage >= percentageFilter) {
             dataRow.appendChild(resultCell);
 
